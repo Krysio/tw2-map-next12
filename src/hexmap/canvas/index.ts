@@ -59,7 +59,7 @@ export function createCanvasInstance(
   return {
     ...api,
     ...buildHooks(props, api),
-    Component: class HexMapCanvasComponent extends React.Component<{className: string}> {
+    HexMap: class HexMapCanvasComponent extends React.Component<{className: string}> {
       componentDidMount() {
         api.setCanvasElement(canvasRef.current);
       }

@@ -31,6 +31,7 @@ export function createApi(props: Props) {
       props.events.emit('position/tile', { x: tileX, y: tileY });
     }
   }
+
   function updateStatePixel() {
     const [ pixelX, pixelY ] = props.state.calcValue2Pixel(
       props.state.normal.center.x, 
@@ -39,6 +40,41 @@ export function createApi(props: Props) {
     props.state.pixel.center.x = pixelX;
     props.state.pixel.center.y = pixelY;
   }
+
+  const smoothSizeState = {
+    tStart: 0,
+    tEnd: 0,
+    vStart: 0,
+    vEnd: 0,
+    active: false
+  };
+  const smoothSizeAnimate = () => {
+    props = props as PropsReady;
+
+    const now = Date.now();
+    const prevValue = props.state.tile.size;
+    let newValue;
+
+    if (smoothSizeState.tEnd < now) {
+        newValue = smoothSizeState.vEnd;
+        smoothSizeState.active = false;
+    } else {
+        newValue = 1 - (smoothSizeState.tEnd - now) / (smoothSizeState.tEnd - smoothSizeState.tStart);
+        newValue = smoothSizeState.vStart + (smoothSizeState.vEnd - smoothSizeState.vStart) * newValue;
+    }
+
+    props.state.tile.size = newValue;
+
+    updateStatePixel();
+
+    props.events.emit('size/tile', [prevValue, newValue]);
+    props.context.uniform1f(props.uniforms.size, newValue);
+    api.requestUpdate();
+
+    if (smoothSizeState.active) {
+        requestAnimationFrame(smoothSizeAnimate);
+    }
+  };
 
   const api = {
     setCanvasElement(canvasElement: HTMLCanvasElement | null) {
@@ -63,24 +99,37 @@ export function createApi(props: Props) {
       }
     },
     setSize(
-      value: number
+      value: number,
+      smooth = false
     ): void {
       if (props.initialized === false) return;
+
       const newValue = Math.max(MIN_TILE_SIZE, Math.min(value, MAX_TILE_SIZE));
       const prevValue = props.state.tile.size;
+      const now = Date.now();
+      
+      if (smooth) {
+        smoothSizeState.vStart = prevValue;
+        smoothSizeState.tStart = now;
+        smoothSizeState.tEnd = now + 50;
+        smoothSizeState.vEnd = newValue;
+        smoothSizeState.active = true;
+      }
 
       if (newValue !== prevValue) {
-        props.state.tile.size = newValue;
-
-        updateStatePixel();
-
-        props.events.emit('size/tile', [prevValue, newValue]);
-        props.context.uniform1f(props.uniforms.size, newValue);
-        api.requestUpdate();
+        
+        if (smoothSizeState.active) {
+          requestAnimationFrame(smoothSizeAnimate);
+        } else {
+          props.state.tile.size = newValue;
+  
+          updateStatePixel();
+  
+          props.events.emit('size/tile', [prevValue, newValue]);
+          props.context.uniform1f(props.uniforms.size, newValue);
+          api.requestUpdate();
+        }
       }
-    },
-    setSizeSmooth() {
-
     },
     setPosition(
       valueX: number,

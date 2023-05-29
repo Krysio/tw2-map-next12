@@ -118,9 +118,9 @@ export function buildEventHandlers(props: PropsReady, api: Api) {
         const current = props.state.tile.size;
 
         if (event.deltaY < 0) {
-          api.setSize(current * 1.1);
+          api.setSize(current * 1.1, true);
         } else {
-          api.setSize(current * 0.9);
+          api.setSize(current * 0.9, true);
         }
       }),
     }

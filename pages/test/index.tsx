@@ -6,16 +6,16 @@ import getHexMapInstance from '@/hexmap';
 const hexMapInstance = getHexMapInstance();
 
 const Home: NextPage = function () {
-  const canvasInstance = hexMapInstance.getCanvasInstance('main');
-  const [ centerX, centerY ] = canvasInstance.usePositionCoords();
-  const [ hoverX, hoverY ] = canvasInstance.useHoverCoords();
+  const { HexMap, usePositionCoords, useHoverCoords } = hexMapInstance.getCanvasInstance('main');
+  const [ centerX, centerY ] = usePositionCoords();
+  const [ hoverX, hoverY ] = useHoverCoords();
 
   const pre = `${centerX}|${centerY}\n${hoverX}|${hoverY}`;
-
+  
   return (
     <div className={styles.container}>
       <pre className={styles.pre}>{ pre }</pre>
-      <canvasInstance.Component className={styles.canvas} />
+      <HexMap className={styles.canvas} />
     </div>
   )
 }

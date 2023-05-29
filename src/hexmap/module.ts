@@ -28,9 +28,10 @@ export function createInstance() {
     tileApi.select(501, 500).setType(TILE_TYPE_VILLAGE).setPrimaryColor(0xffff00ff);
     tileApi.select(501, 501).setType(TILE_TYPE_VILLAGE).setPrimaryColor(0x00ffffff);
     tileApi.select(500, 501).setType(TILE_TYPE_VILLAGE).setPrimaryColor(0xff00ffff);
-    for (let i =0; i < 5e3; i++) {
+    for (let i =0; i < 5e4; i++) {
       const x = Math.ceil(Math.random() * 1e3);
       const y = Math.ceil(Math.random() * 1e3);
+      tileApi.select(x, y).setType(TILE_TYPE_VILLAGE).setPrimaryColor(0xffffffff);
       tileApi.select(x, y).setType(TILE_TYPE_VILLAGE).setSecondaryColor(6);
     }
   }
@@ -38,7 +39,7 @@ export function createInstance() {
   const instance = {
     tile: tileApi,
     color: colorApi,
-    getCanvasInstance(instanceName: string) {
+    getCanvasInstance: function getCanvasInstanceFromStorageByName(instanceName: string) {
       let canvasInstace = mapOfCanvasIstances.get(instanceName) as ReturnType<typeof createCanvasInstance>;
 
       if (canvasInstace === undefined) {
